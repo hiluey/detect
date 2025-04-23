@@ -1,33 +1,25 @@
-/*import { Metadata } from "next"
-
-export const metadata: Metadata = {
-  title: 'AI-Detect Human',
-  description: 'Detector de IA'
-}
-
-export default function Human() {
-    return(
-      <div>
-        <h1>Human</h1>
-      </div>
-    )
-  }*/
-
 'use client'
 
 import { useState } from 'react'
+import { saveAnalysis } from '@/lib/saveAnalysis'
+import { useStore } from '@/lib/useStore'
 
 export default function HumanizerPage() {
   const [inputText, setInputText] = useState('')
   const [outputText, setOutputText] = useState('')
   const [loading, setLoading] = useState(false)
+  const { user } = useStore() // <- pega o user logado
 
   const handleHumanize = async () => {
+    if (!user) {
+      setOutputText('Você precisa estar logado para usar o humanizador.')
+      return
+    }
+
     setLoading(true)
     setOutputText('')
 
     try {
-      // Etapa 1: enviar texto
       const submitRes = await fetch('https://humanize.undetectable.ai/submit', {
         method: 'POST',
         headers: {
@@ -50,12 +42,11 @@ export default function HumanizerPage() {
         throw new Error('Erro ao enviar o texto.')
       }
 
-      // Etapa 2: checar até estar pronto
       let tries = 0
       let resultData = null
 
       while (tries < 10) {
-        await new Promise((r) => setTimeout(r, 3000)) // aguarda 3s entre tentativas
+        await new Promise((r) => setTimeout(r, 3000))
 
         const checkRes = await fetch('https://humanize.undetectable.ai/document', {
           method: 'POST',
@@ -77,6 +68,13 @@ export default function HumanizerPage() {
 
       if (resultData?.output) {
         setOutputText(resultData.output)
+        await saveAnalysis({
+          user,
+          type: 'humanizer',
+          input_text: inputText,
+          result: resultData.output
+        });
+        
       } else {
         setOutputText('Texto ainda não processado ou falha na resposta.')
       }

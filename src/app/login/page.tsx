@@ -12,36 +12,76 @@ export default function Login() {
       </div>
     )
   }*/
- 'use client';
+ 'use client'
+'use client';
+
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { loginUser } from '@/lib/auth';
+import { supabase } from '@/lib/supabaseClient';
+import { useStore } from '@/lib/useStore';
 
 export default function LoginPage() {
-  const router = useRouter();
   const [email, setEmail] = useState('');
-  const [senha, setSenha] = useState('');
-  const [erro, setErro] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const router = useRouter();
+  const setUser = useStore((state) => state.setUser);
 
-  const handleLogin = async () => {
-    setErro('');
-    try {
-      const result = await loginUser(email, senha);
-      console.log('Usuário logado:', result.user);
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
 
-      router.push('/detect'); 
-    } catch (err: any) {
-      setErro(err.message);
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error || !data.user) {
+      setError('Usuário não encontrado na tabela.');
+      return;
     }
+
+    // Busca o usuário completo na tabela "users"
+    const { data: userData, error: userError } = await supabase
+      .from('users')
+      .select('*')
+      .eq('auth_user_id', data.user.id)
+      .single();
+
+    if (userError || !userData) {
+      setError('Erro ao buscar dados do usuário.');
+      return;
+    }
+
+    // Salva no Zustand com o auth_user_id incluso
+    setUser({
+      id: userData.id,
+      email: data.user.email || '',
+      username: userData.username,
+      auth_user_id: data.user.id,
+    });
+
+    router.push('/history');
   };
 
   return (
-    <div>
-      <h1>Login</h1>
-      <input value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" />
-      <input type="password" value={senha} onChange={e => setSenha(e.target.value)} placeholder="Senha" />
-      {erro && <p style={{ color: 'red' }}>{erro}</p>}
-      <button onClick={handleLogin}>Entrar</button>
-    </div>
+    <form onSubmit={handleLogin}>
+      <input
+        type="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        placeholder="Email"
+        required
+      />
+      <input
+        type="password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        placeholder="Senha"
+        required
+      />
+      <button type="submit">Entrar</button>
+      {error && <p>{error}</p>}
+    </form>
   );
 }

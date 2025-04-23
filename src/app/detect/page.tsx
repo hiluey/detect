@@ -1,29 +1,16 @@
-
-/*import { Metadata } from "next"
-
-export const metadata: Metadata = {
-  title: 'AI-Detect',
-  description: 'Detector de IA'
-}
-
-export default function Home() {
-    return(
-      <div>
-        <h1>Detector</h1>
-      </div>
-    )
-  }*/
-
-// app/page.tsx ou outro arquivo dentro do seu componente
 'use client'
 
 import { useState } from "react"
+import { saveAnalysis } from "@/lib/saveAnalysis"
+import { useStore } from "@/lib/useStore"
 
 export default function Home() {
   const [text, setText] = useState("")
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<number | null>(null)
   const [status, setStatus] = useState("")
+
+  const { user } = useStore() // <-- pega o usuário (pode ser undefined)
 
   const handleDetect = async () => {
     setLoading(true)
@@ -58,10 +45,20 @@ export default function Home() {
       if (data.status === "done") {
         setResult(data.result)
         setStatus("Análise concluída.")
+
+        // Salvar no Supabase
+        await saveAnalysis({
+          type: "detector",
+          input_text: text,
+          result: String(data.result),
+          user, // <-- funciona mesmo que undefined
+        })
+
       } else {
         setStatus("Tempo limite. Tente novamente.")
       }
     } catch (err) {
+      console.error(err)
       setStatus("Erro ao detectar.")
     }
 
