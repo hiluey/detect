@@ -45,15 +45,11 @@ export default function HistoryPage() {
 
   if (!user) {
     return (
-      <div className="p-6">
-        <div className="bg-gray-100 text-center p-4 rounded">
-          <p className="mb-2 font-medium">Você não está logado.</p>
-          <a href="/login" className="text-blue-600 underline">
-            Faça login ou cadastre-se.
-          </a>
-        </div>
+      <div className="max-w-xl mx-auto p-6 text-center">
+        <h1 className="text-2xl font-bold mb-4">Histórico</h1>
+        <p className="text-red-600">Você precisa estar logado para acessar o histórico.</p>
       </div>
-    )
+    );
   }
 
   return (
