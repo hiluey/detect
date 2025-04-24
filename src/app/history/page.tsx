@@ -23,7 +23,6 @@ export default function HistoryPage() {
       .from('analyses')
       .select('*')
       .eq('user_id', user.auth_user_id)
-
       .eq('type', type)
       .order('created_at', { ascending: false })
 
@@ -46,47 +45,66 @@ export default function HistoryPage() {
   if (!user) {
     return (
       <div className="max-w-xl mx-auto p-6 text-center">
-        <h1 className="text-2xl font-bold mb-4">Histórico</h1>
+        <h1 className="text-3xl font-bold text-gray-800 mb-4">Histórico</h1>
         <p className="text-red-600">Você precisa estar logado para acessar o histórico.</p>
       </div>
-    );
+    )
   }
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Histórico</h1>
+    <div className="flex justify-center px-4 py-12 min-h-[80vh]">
+      <div className="w-full max-w-4xl bg-white border border-gray-200 rounded-3xl shadow-xl p-8 sm:p-10">
+        <h1 className="text-3xl font-bold text-gray-800 text-center mb-8">📜 Histórico</h1>
 
-      <div className="flex gap-4 mb-6">
-        <button
-          className={`px-4 py-2 rounded ${type === 'detector' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
-          onClick={() => setType('detector')}
-        >
-          Detector
-        </button>
-        <button
-          className={`px-4 py-2 rounded ${type === 'humanizer' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
-          onClick={() => setType('humanizer')}
-        >
-          Humanizador
-        </button>
+        <div className="flex justify-center gap-4 mb-8">
+          <button
+            className={`px-6 py-2.5 rounded-full font-medium transition ${
+              type === 'detector'
+                ? 'bg-blue-600 text-white shadow'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+            onClick={() => setType('detector')}
+          >
+            Detector
+          </button>
+          <button
+            className={`px-6 py-2.5 rounded-full font-medium transition ${
+              type === 'humanizer'
+                ? 'bg-blue-600 text-white shadow'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+            onClick={() => setType('humanizer')}
+          >
+            Humanizador
+          </button>
+        </div>
+
+        {loading ? (
+          <p className="text-center text-gray-500">Carregando...</p>
+        ) : data.length === 0 ? (
+          <p className="text-center text-gray-500">Nenhum dado encontrado.</p>
+        ) : (
+          <ul className="space-y-4">
+            {data.map((item, idx) => (
+              <li
+                key={item.id || idx}
+                className="bg-gray-50 border border-gray-200 rounded-2xl p-6 shadow-sm transition hover:shadow-md"
+              >
+                <p className="text-sm text-gray-500 mb-2">
+                  <strong className="text-gray-700">Data:</strong>{' '}
+                  {new Date(item.created_at).toLocaleString()}
+                </p>
+                <p className="text-gray-800 mb-2">
+                  <strong className="text-gray-700">Texto:</strong> {item.input}
+                </p>
+                <p className="text-gray-800">
+                  <strong className="text-gray-700">Resultado:</strong> {item.result}
+                </p>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
-
-      {loading ? (
-        <p>Carregando...</p>
-      ) : data.length === 0 ? (
-        <p>Nenhum dado encontrado.</p>
-      ) : (
-        <ul className="space-y-2">
-          {data.map((item, idx) => (
-            <li key={item.id || idx} className="border p-4 rounded shadow">
-              <p><strong>ID:</strong> {item.id}</p>
-              <p><strong>Texto:</strong> {item.input}</p>
-              <p><strong>Resultado:</strong> {item.result}</p>
-              <p><strong>Data:</strong> {new Date(item.created_at).toLocaleString()}</p>
-            </li>
-          ))}
-        </ul>
-      )}
     </div>
   )
 }

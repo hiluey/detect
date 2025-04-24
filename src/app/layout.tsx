@@ -5,6 +5,7 @@ import { useStore } from '@/lib/useStore'
 import { supabase } from '@/lib/supabaseClient'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import md5 from 'md5'
 import {
   UserCircle2,
   ShieldCheck,
@@ -18,10 +19,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className="bg-gray-100 text-gray-900 font-sans antialiased">
-        <div className="min-h-screen grid grid-cols-[240px_1fr] grid-rows-[64px_1fr]">
+        <div className="min-h-screen grid grid-cols-1 md:grid-cols-[240px_1fr] grid-rows-[64px_1fr]">
           <Header />
           <Sidebar />
-          <main className="p-8 bg-gray-50 overflow-y-auto rounded-tl-3xl shadow-inner">{children}</main>
+          <main className="p-6 md:p-8 bg-gray-50 overflow-y-auto">{children}</main>
         </div>
       </body>
     </html>
@@ -37,7 +38,7 @@ function Sidebar() {
   ]
 
   return (
-    <aside className="bg-white border-r px-6 py-10 flex flex-col gap-10 shadow-md">
+    <aside className="hidden md:flex bg-white border-r px-4 md:px-6 py-8 md:py-10 flex-col gap-10 shadow-md">
       <div className="flex items-center gap-2 text-2xl font-bold text-blue-600 tracking-tight">
         <Cpu size={26} className="text-blue-500" />
         IA Detector
@@ -59,6 +60,11 @@ function Sidebar() {
   )
 }
 
+function getGravatarUrl(email: string) {
+  const hash = md5(email.trim().toLowerCase())
+  return `https://www.gravatar.com/avatar/${hash}?d=identicon`
+}
+
 function Header() {
   const { user, setUser } = useStore()
   const router = useRouter()
@@ -70,8 +76,11 @@ function Header() {
     router.push('/login')
   }
 
+  const userEmail = user?.email || ''
+  const avatar = userEmail ? getGravatarUrl(userEmail) : null
+
   return (
-    <header className="col-span-2 h-16 bg-white border-b flex items-center justify-between px-6 shadow-sm relative z-20">
+    <header className="col-span-1 md:col-span-2 h-16 bg-white border-b flex items-center justify-between px-4 md:px-6 shadow-sm relative z-20">
       <div className="flex items-center gap-2 text-xl font-semibold text-gray-800">
         <Cpu size={22} className="text-blue-600" />
         IA Detector
@@ -82,7 +91,15 @@ function Header() {
           onClick={() => setShowMenu(!showMenu)}
           className="flex items-center gap-2 hover:opacity-80 transition-opacity"
         >
-          <UserCircle2 size={28} className="text-gray-600" />
+          {avatar ? (
+            <img
+              src={avatar}
+              alt="Avatar"
+              className="w-8 h-8 rounded-full object-cover border"
+            />
+          ) : (
+            <UserCircle2 size={28} className="text-gray-600" />
+          )}
         </button>
 
         {showMenu && (

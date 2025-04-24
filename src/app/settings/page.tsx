@@ -71,7 +71,6 @@ export default function SettingsPage() {
         return;
       }
 
-      // Reautenticar antes de atualizar a senha
       const { error: loginError } = await supabase.auth.signInWithPassword({
         email: user.email,
         password: currentPassword,
@@ -114,73 +113,83 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="max-w-xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-4">Configurações da Conta</h1>
-      <form onSubmit={handleUpdate} className="space-y-4">
-        <input
-          type="text"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          placeholder="Nome de usuário"
-          className="w-full p-2 border rounded"
-        />
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="E-mail"
-          className="w-full p-2 border rounded"
-        />
-        <input
-          type="date"
-          value={birthdate}
-          onChange={(e) => setBirthdate(e.target.value)}
-          className="w-full p-2 border rounded"
-        />
+    <div className="max-w-2xl mx-auto p-6">
+      <h1 className="text-3xl font-bold mb-6 text-center">Configurações da Conta</h1>
+      <form onSubmit={handleUpdate} className="space-y-6 bg-white shadow rounded-xl p-6">
+        <div className="space-y-4">
+          <input
+            type="text"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            placeholder="Nome de usuário"
+            className="w-full p-3 border border-gray-300 rounded-lg"
+          />
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="E-mail"
+            className="w-full p-3 border border-gray-300 rounded-lg"
+          />
+          <input
+            type="date"
+            value={birthdate}
+            onChange={(e) => setBirthdate(e.target.value)}
+            className="w-full p-3 border border-gray-300 rounded-lg"
+          />
+        </div>
 
         <button
           type="button"
           onClick={() => setShowPasswordFields(!showPasswordFields)}
-          className="text-blue-600 underline"
+          className="text-sm text-blue-600 hover:underline"
         >
           {showPasswordFields ? 'Cancelar alteração de senha' : 'Alterar senha?'}
         </button>
 
         {showPasswordFields && (
-          <>
+          <div className="space-y-4">
             <input
               type="password"
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
               placeholder="Senha atual"
-              className="w-full p-2 border rounded"
+              className="w-full p-3 border border-gray-300 rounded-lg"
             />
             <input
               type="password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               placeholder="Nova senha"
-              className="w-full p-2 border rounded"
+              className="w-full p-3 border border-gray-300 rounded-lg"
             />
             <input
               type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="Confirme a nova senha"
-              className="w-full p-2 border rounded"
+              className="w-full p-3 border border-gray-300 rounded-lg"
             />
-          </>
+          </div>
         )}
 
         <button
           type="submit"
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+          className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition"
         >
           Salvar Alterações
         </button>
-      </form>
 
-      {message && <p className="mt-4 text-center text-red-600">{message}</p>}
+        {message && (
+          <div
+            className={`mt-4 text-center text-sm font-medium ${
+              message.includes('sucesso') ? 'text-green-600' : 'text-red-600'
+            }`}
+          >
+            {message}
+          </div>
+        )}
+      </form>
     </div>
   );
 }

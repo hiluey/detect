@@ -1,18 +1,4 @@
-/*import { Metadata } from "next"
-
-export const metadata: Metadata = {
-  title: 'AI-Detect Signup',
-  description: 'Detector de IA'
-} 
-export default function Signup() {
-    return(
-      <div>
-        <h1>Signup</h1>
-      </div>
-    )
-  }*/
-
-    'use client';
+'use client';
 
 import { useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
@@ -30,7 +16,6 @@ export default function SignupPage() {
     e.preventDefault();
     setErro('');
 
-    // 1. Cadastrar no Auth
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password: senha,
@@ -42,13 +27,11 @@ export default function SignupPage() {
     }
 
     const userId = authData.user?.id;
-
     if (!userId) {
       setErro('Erro ao obter ID do usuário.');
       return;
     }
 
-    // 2. Cadastrar dados extras na tabela "users"
     const { error: insertError } = await supabase.from('users').insert([
       {
         auth_user_id: userId,
@@ -63,49 +46,68 @@ export default function SignupPage() {
       return;
     }
 
-    // Redirecionar após sucesso
     router.push('/login');
   };
 
   return (
-    <div className="p-6 max-w-md mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Cadastro</h1>
-      <form onSubmit={handleSignup} className="space-y-4">
-        <input
-          type="text"
-          placeholder="Nome de usuário"
-          className="w-full p-2 border rounded"
-          value={username}
-          onChange={e => setUsername(e.target.value)}
-          required
-        />
-        <input
-          type="email"
-          placeholder="Email"
-          className="w-full p-2 border rounded"
-          value={email}
-          onChange={e => setEmail(e.target.value)}
-          required
-        />
-        <input
-          type="password"
-          placeholder="Senha"
-          className="w-full p-2 border rounded"
-          value={senha}
-          onChange={e => setSenha(e.target.value)}
-          required
-        />
-        <input
-          type="date"
-          className="w-full p-2 border rounded"
-          value={birthdate}
-          onChange={e => setBirthdate(e.target.value)}
-          required
-        />
-        {erro && <p className="text-red-600">{erro}</p>}
-        <button type="submit" className="w-full bg-green-500 text-white p-2 rounded">
+    <div className="flex justify-center px-4 py-16">
+      <form
+        onSubmit={handleSignup}
+        className="w-full max-w-sm bg-white p-8 rounded-xl shadow border border-gray-200"
+      >
+        <h1 className="text-xl font-semibold text-center text-gray-800 mb-6">
+          Criar Conta
+        </h1>
+
+        <div className="space-y-4">
+          <input
+            type="text"
+            placeholder="Nome de usuário"
+            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={username}
+            onChange={e => setUsername(e.target.value)}
+            required
+          />
+          <input
+            type="email"
+            placeholder="E-mail"
+            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            required
+          />
+          <input
+            type="password"
+            placeholder="Senha"
+            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={senha}
+            onChange={e => setSenha(e.target.value)}
+            required
+          />
+          <input
+            type="date"
+            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={birthdate}
+            onChange={e => setBirthdate(e.target.value)}
+            required
+          />
+        </div>
+
+        {erro && <p className="text-sm text-red-600 mt-2 text-center">{erro}</p>}
+
+        <button
+          type="submit"
+          className="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg transition"
+        >
           Cadastrar
         </button>
+
+        <p className="text-sm text-center text-gray-600 mt-4">
+          Já tem uma conta?{' '}
+          <a href="/login" className="text-blue-600 hover:underline">
+            Entrar
+          </a>
+        </p>
       </form>
     </div>
   );
