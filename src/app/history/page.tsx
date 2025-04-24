@@ -9,6 +9,8 @@ export default function HistoryPage() {
   const [data, setData] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
   const [type, setType] = useState<'detector' | 'humanizer'>('detector')
+  const [startDate, setStartDate] = useState('')
+  const [endDate, setEndDate] = useState('')
 
   const fetchData = async () => {
     if (!user) {
@@ -19,12 +21,21 @@ export default function HistoryPage() {
     setLoading(true)
     console.log('🔍 Buscando dados para user_id:', user.id, 'e type:', type)
 
-    const { data, error } = await supabase
+    let query = supabase
       .from('analyses')
       .select('*')
       .eq('user_id', user.auth_user_id)
       .eq('type', type)
       .order('created_at', { ascending: false })
+
+    if (startDate) {
+      query = query.gte('created_at', new Date(startDate).toISOString())
+    }
+    if (endDate) {
+      query = query.lte('created_at', new Date(endDate + 'T23:59:59').toISOString())
+    }
+
+    const { data, error } = await query
 
     console.log('📦 Data:', data)
     console.log('❌ Error:', error)
@@ -79,6 +90,50 @@ export default function HistoryPage() {
           </button>
         </div>
 
+      {/* Filtro por data */}
+<div className="flex flex-wrap justify-center items-end gap-4 mb-6">
+  <div className="flex flex-col">
+    <label className="text-sm font-medium text-gray-700 mb-1">📅 Início</label>
+    <input
+      type="date"
+      className="border border-gray-300 rounded-xl px-4 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+      value={startDate}
+      onChange={(e) => setStartDate(e.target.value)}
+    />
+  </div>
+  <div className="flex flex-col">
+    <label className="text-sm font-medium text-gray-700 mb-1">📅 Fim</label>
+    <input
+      type="date"
+      className="border border-gray-300 rounded-xl px-4 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+      value={endDate}
+      onChange={(e) => setEndDate(e.target.value)}
+    />
+  </div>
+  <button
+    onClick={fetchData}
+    className="bg-blue-600 text-white px-6 py-2 rounded-full shadow hover:bg-blue-700 transition font-semibold"
+  >
+    Filtrar
+  </button>
+  <button
+    onClick={() => {
+      setStartDate('')
+      setEndDate('')
+      fetchData()
+    }}
+    className="bg-white border border-gray-300 text-gray-700 px-6 py-2 rounded-full shadow hover:bg-gray-100 transition font-semibold"
+  >
+    Ver tudo
+  </button>
+</div>
+
+{/* Contador */}
+<p className="text-sm text-gray-600 text-center mb-6 italic">
+  Total de registros encontrados: <span className="font-semibold">{data.length}</span>
+</p>
+
+
         {loading ? (
           <p className="text-center text-gray-500">Carregando...</p>
         ) : data.length === 0 ? (
@@ -98,7 +153,12 @@ export default function HistoryPage() {
                   <strong className="text-gray-700">Texto:</strong> {item.input}
                 </p>
                 <p className="text-gray-800">
-                  <strong className="text-gray-700">Resultado:</strong> {item.result}
+                  <strong className="text-gray-700">Resultado:</strong>{' '}
+                  {item.output
+                    ? parseFloat(item.output) >= 50
+                      ? 'Provável IA'
+                      : 'Provável Humano'
+                    : 'Indefinido'}
                 </p>
               </li>
             ))}

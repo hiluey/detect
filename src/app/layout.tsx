@@ -83,7 +83,7 @@ function Header() {
     <header className="col-span-1 md:col-span-2 h-16 bg-white border-b flex items-center justify-between px-4 md:px-6 shadow-sm relative z-20">
       <div className="flex items-center gap-2 text-xl font-semibold text-gray-800">
         <Cpu size={22} className="text-blue-600" />
-        IA Detector
+        IA or Human
       </div>
 
       <div className="relative">
