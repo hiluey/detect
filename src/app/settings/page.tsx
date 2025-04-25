@@ -1,134 +1,150 @@
-'use client';
+'use client'
 
-import { useState, useEffect } from 'react';
-import { useStore } from '@/lib/useStore';
-import { supabase } from '@/lib/supabaseClient';
-import type { User } from '@/lib/types';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react'
+import { useStore } from '@/lib/useStore'
+import { supabase } from '@/lib/supabaseClient'
+import type { User } from '@/lib/types'
+import { useRouter } from 'next/navigation'
 
 export default function SettingsPage() {
-  const { user, setUser } = useStore() as { user: User; setUser: (u: User) => void };
-  const router = useRouter();
+  const { user, setUser } = useStore() as { user: User; setUser: (u: User) => void }
+  const router = useRouter()
 
-  const [username, setUsername] = useState('');
-  const [email, setEmail] = useState('');
-  const [birthdate, setBirthdate] = useState('');
-  const [showPasswordFields, setShowPasswordFields] = useState(false);
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [message, setMessage] = useState('');
+  const [username, setUsername] = useState('')
+  const [email, setEmail] = useState('')
+  const [birthdate, setBirthdate] = useState('')
+  const [showPasswordFields, setShowPasswordFields] = useState(false)
+  const [currentPassword, setCurrentPassword] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [message, setMessage] = useState('')
 
   useEffect(() => {
-    if (user) {
-      setUsername(user.username || '');
-      setEmail(user.email || '');
-      setBirthdate(user.birthdate || '');
+    const fetchUserDetails = async () => {
+      if (user?.auth_user_id) {
+        const { data: userDetails, error } = await supabase
+          .from('users')
+          .select('*')
+          .eq('auth_user_id', user.auth_user_id)
+          .single()
+
+        if (userDetails) {
+          setUsername(userDetails.username || '')
+          setEmail(userDetails.email || '')
+          setBirthdate(userDetails.birthdate ? userDetails.birthdate.slice(0, 10) : '')
+        }
+
+        if (error) {
+          console.error('Error fetching user details:', error)
+        }
+      }
     }
-  }, [user]);
+
+    fetchUserDetails()
+  }, [user])
 
   const handleUpdate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setMessage('');
-    if (!user) return;
+    e.preventDefault()
+    setMessage('')
+    if (!user) return
 
     const isValidBirthdate = (dateStr: string) => {
-      const date = new Date(dateStr);
-      return !isNaN(date.getTime()) && date.getFullYear() > 1900 && date < new Date();
-    };
+      const date = new Date(dateStr)
+      return !isNaN(date.getTime()) && date.getFullYear() > 1900 && date < new Date()
+    }
 
-    const updatePayload: any = { username };
-    if (isValidBirthdate(birthdate)) updatePayload.birthdate = birthdate;
+    const updatePayload: any = { username }
+    if (isValidBirthdate(birthdate)) updatePayload.birthdate = birthdate
 
     const { error: updateError } = await supabase
       .from('users')
       .update(updatePayload)
-      .eq('auth_user_id', user.auth_user_id);
+      .eq('auth_user_id', user.auth_user_id)
 
     if (updateError) {
-      console.error('Erro ao atualizar a tabela users:', updateError.message);
-      setMessage('Erro ao atualizar dados do perfil.');
-      return;
+      console.error('Update error:', updateError)
+      setMessage('Failed to update user data.')
+      return
     }
 
     if (email !== user.email) {
-      const { error: emailError } = await supabase.auth.updateUser({ email });
+      const { error: emailError } = await supabase.auth.updateUser({ email })
       if (emailError) {
-        console.error('Erro ao atualizar email:', emailError.message);
-        setMessage('Erro ao atualizar email.');
-        return;
+        setMessage('Failed to update email.')
+        return
       }
     }
 
     if (showPasswordFields) {
       if (!currentPassword || !newPassword || !confirmPassword) {
-        setMessage('Preencha todos os campos de senha.');
-        return;
+        setMessage('Please fill in all password fields.')
+        return
       }
 
       if (newPassword !== confirmPassword) {
-        setMessage('As novas senhas não coincidem.');
-        return;
+        setMessage('New passwords do not match.')
+        return
       }
 
       const { error: loginError } = await supabase.auth.signInWithPassword({
         email: user.email,
         password: currentPassword,
-      });
+      })
 
       if (loginError) {
-        console.error('Senha atual incorreta:', loginError.message);
-        setMessage('Senha atual incorreta.');
-        return;
+        setMessage('Incorrect current password.')
+        return
       }
 
       if (currentPassword === newPassword) {
-        setMessage('A nova senha deve ser diferente da atual.');
-        return;
+        setMessage('New password must be different from the current one.')
+        return
       }
 
       const { error: passwordError } = await supabase.auth.updateUser({
         password: newPassword,
-      });
+      })
 
       if (passwordError) {
-        console.error('Erro ao atualizar senha:', passwordError.message);
-        setMessage('A senha deve conter pelo menos 6 caracteries.');
-        return;
+        setMessage('Password must be at least 6 characters.')
+        return
       }
     }
 
-    setUser({ ...user, username, email, birthdate });
-    setMessage('Dados atualizados com sucesso!');
-    router.refresh();
-  };
+    setUser({ ...user, username, email, birthdate })
+    setMessage('Profile updated successfully!')
+    router.refresh()
+  }
 
   if (!user) {
     return (
       <div className="max-w-xl mx-auto p-6 text-center">
-        <h1 className="text-2xl font-bold mb-4">Configurações da Conta</h1>
-        <p className="text-red-600">Você precisa estar logado para acessar as configurações.</p>
+        <h1 className="text-2xl font-bold mb-4">Account Settings</h1>
+        <p className="text-red-600">You must be logged in to access settings.</p>
       </div>
-    );
+    )
   }
 
   return (
     <div className="max-w-2xl mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-6 text-center">Configurações da Conta</h1>
-      <form onSubmit={handleUpdate} className="space-y-6 bg-white shadow rounded-xl p-6">
+      <h1 className="text-3xl font-bold mb-6 text-center">Account Settings</h1>
+      <form onSubmit={handleUpdate} autoComplete="off" className="space-y-6 bg-white shadow rounded-xl p-6">
+        <input type="text" name="fakeusernameremembered" className="hidden" />
+        <input type="password" name="fakepasswordremembered" className="hidden" />
+
         <div className="space-y-4">
           <input
             type="text"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            placeholder="Nome de usuário"
+            placeholder="Username"
             className="w-full p-3 border border-gray-300 rounded-lg"
           />
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="E-mail"
+            placeholder="Email"
             className="w-full p-3 border border-gray-300 rounded-lg"
           />
           <input
@@ -144,30 +160,36 @@ export default function SettingsPage() {
           onClick={() => setShowPasswordFields(!showPasswordFields)}
           className="text-sm text-blue-600 hover:underline"
         >
-          {showPasswordFields ? 'Cancelar alteração de senha' : 'Alterar senha?'}
+          {showPasswordFields ? 'Cancel password change' : 'Change password?'}
         </button>
 
         {showPasswordFields && (
           <div className="space-y-4">
             <input
               type="password"
+              name="current-password-dummy"
+              autoComplete="new-password"
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
-              placeholder="Senha atual"
+              placeholder="Current password"
               className="w-full p-3 border border-gray-300 rounded-lg"
             />
             <input
               type="password"
+              name="new-password"
+              autoComplete="new-password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
-              placeholder="Nova senha"
+              placeholder="New password"
               className="w-full p-3 border border-gray-300 rounded-lg"
             />
             <input
               type="password"
+              name="confirm-password"
+              autoComplete="new-password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Confirme a nova senha"
+              placeholder="Confirm new password"
               className="w-full p-3 border border-gray-300 rounded-lg"
             />
           </div>
@@ -177,13 +199,13 @@ export default function SettingsPage() {
           type="submit"
           className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition"
         >
-          Salvar Alterações
+          Save Changes
         </button>
 
         {message && (
           <div
             className={`mt-4 text-center text-sm font-medium ${
-              message.includes('sucesso') ? 'text-green-600' : 'text-red-600'
+              message.includes('success') ? 'text-green-600' : 'text-red-600'
             }`}
           >
             {message}
@@ -191,5 +213,5 @@ export default function SettingsPage() {
         )}
       </form>
     </div>
-  );
+  )
 }

@@ -11,6 +11,7 @@ export default function HistoryPage() {
   const [type, setType] = useState<'detector' | 'humanizer'>('detector')
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
+  const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({})
 
   const fetchData = async () => {
     if (!user) {
@@ -90,49 +91,46 @@ export default function HistoryPage() {
           </button>
         </div>
 
-      {/* Filtro por data */}
-<div className="flex flex-wrap justify-center items-end gap-4 mb-6">
-  <div className="flex flex-col">
-    <label className="text-sm font-medium text-gray-700 mb-1">📅 Início</label>
-    <input
-      type="date"
-      className="border border-gray-300 rounded-xl px-4 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-      value={startDate}
-      onChange={(e) => setStartDate(e.target.value)}
-    />
-  </div>
-  <div className="flex flex-col">
-    <label className="text-sm font-medium text-gray-700 mb-1">📅 Fim</label>
-    <input
-      type="date"
-      className="border border-gray-300 rounded-xl px-4 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-      value={endDate}
-      onChange={(e) => setEndDate(e.target.value)}
-    />
-  </div>
-  <button
-    onClick={fetchData}
-    className="bg-blue-600 text-white px-6 py-2 rounded-full shadow hover:bg-blue-700 transition font-semibold"
-  >
-    Filtrar
-  </button>
-  <button
-    onClick={() => {
-      setStartDate('')
-      setEndDate('')
-      fetchData()
-    }}
-    className="bg-white border border-gray-300 text-gray-700 px-6 py-2 rounded-full shadow hover:bg-gray-100 transition font-semibold"
-  >
-    Ver tudo
-  </button>
-</div>
+        <div className="flex flex-wrap justify-center items-end gap-4 mb-6">
+          <div className="flex flex-col">
+            <label className="text-sm font-medium text-gray-700 mb-1">📅 Início</label>
+            <input
+              type="date"
+              className="border border-gray-300 rounded-xl px-4 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+            />
+          </div>
+          <div className="flex flex-col">
+            <label className="text-sm font-medium text-gray-700 mb-1">📅 Fim</label>
+            <input
+              type="date"
+              className="border border-gray-300 rounded-xl px-4 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+            />
+          </div>
+          <button
+            onClick={fetchData}
+            className="bg-blue-600 text-white px-6 py-2 rounded-full shadow hover:bg-blue-700 transition font-semibold"
+          >
+            Filtrar
+          </button>
+          <button
+            onClick={() => {
+              setStartDate('')
+              setEndDate('')
+              fetchData()
+            }}
+            className="bg-white border border-gray-300 text-gray-700 px-6 py-2 rounded-full shadow hover:bg-gray-100 transition font-semibold"
+          >
+            Ver tudo
+          </button>
+        </div>
 
-{/* Contador */}
-<p className="text-sm text-gray-600 text-center mb-6 italic">
-  Total de registros encontrados: <span className="font-semibold">{data.length}</span>
-</p>
-
+        <p className="text-sm text-gray-600 text-center mb-6 italic">
+          Total de registros encontrados: <span className="font-semibold">{data.length}</span>
+        </p>
 
         {loading ? (
           <p className="text-center text-gray-500">Carregando...</p>
@@ -140,28 +138,77 @@ export default function HistoryPage() {
           <p className="text-center text-gray-500">Nenhum dado encontrado.</p>
         ) : (
           <ul className="space-y-4">
-            {data.map((item, idx) => (
-              <li
-                key={item.id || idx}
-                className="bg-gray-50 border border-gray-200 rounded-2xl p-6 shadow-sm transition hover:shadow-md"
-              >
-                <p className="text-sm text-gray-500 mb-2">
-                  <strong className="text-gray-700">Data:</strong>{' '}
-                  {new Date(item.created_at).toLocaleString()}
-                </p>
-                <p className="text-gray-800 mb-2">
-                  <strong className="text-gray-700">Texto:</strong> {item.input}
-                </p>
-                <p className="text-gray-800">
-                  <strong className="text-gray-700">Resultado:</strong>{' '}
-                  {item.output
-                    ? parseFloat(item.output) >= 50
-                      ? 'Provável IA'
-                      : 'Provável Humano'
-                    : 'Indefinido'}
-                </p>
-              </li>
-            ))}
+            {data.map((item, idx) => {
+              const isExpanded = expandedItems[item.id] || false
+              const toggleExpand = () => {
+                setExpandedItems((prev) => ({
+                  ...prev,
+                  [item.id]: !isExpanded,
+                }))
+              }
+
+              const textContent = item.input ?? ''
+
+              const previewText = textContent.slice(0, 200)
+
+              const handleCopy = async () => {
+                try {
+                  await navigator.clipboard.writeText(textContent)
+                  alert('Texto copiado!')
+                } catch (err) {
+                  alert('Erro ao copiar texto.')
+                }
+              }
+
+              return (
+                <li
+                  key={item.id || idx}
+                  className="bg-gray-50 border border-gray-200 rounded-2xl p-6 shadow-sm transition hover:shadow-md"
+                >
+                  <p className="text-sm text-gray-500 mb-2">
+                    <strong className="text-gray-700">Data:</strong>{' '}
+                    {new Date(item.created_at).toLocaleString()}
+                  </p>
+
+                  <div className="flex flex-col gap-2 mb-2">
+                    <button
+                      onClick={handleCopy}
+                      className="text-sm text-blue-600 hover:underline font-medium self-start"
+                    >
+                      Copiar texto
+                    </button>
+
+                    <p className="text-gray-800 whitespace-pre-wrap">
+                      <strong className="text-gray-700">
+                        {type === 'humanizer' ? 'Texto Humanizado:' : 'Texto:'}
+                      </strong>{' '}
+                      {isExpanded
+                        ? textContent
+                        : previewText + (textContent.length > 200 ? '...' : '')}
+                      {textContent.length > 200 && (
+                        <button
+                          onClick={toggleExpand}
+                          className="ml-2 text-blue-600 hover:underline text-sm font-medium"
+                        >
+                          {isExpanded ? 'Ler menos' : 'Ler mais'}
+                        </button>
+                      )}
+                    </p>
+                  </div>
+
+                  {type === 'detector' && (
+                    <p className="text-sm text-gray-700">
+                      <strong>Resultado:</strong>{' '}
+                      {item.output
+                        ? parseFloat(item.output) >= 50
+                          ? 'Provável IA'
+                          : 'Provável Humano'
+                        : 'Indefinido'}
+                    </p>
+                  )}
+                </li>
+              )
+            })}
           </ul>
         )}
       </div>
