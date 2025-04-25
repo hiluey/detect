@@ -119,12 +119,20 @@ export default function SettingsPage() {
   if (!user) {
     return (
       <div className="max-w-xl mx-auto p-6 text-center">
-        <h1 className="text-2xl font-bold mb-4">Account Settings</h1>
-        <p className="text-red-600">You must be logged in to access settings.</p>
+        <h1 className="text-3xl font-bold text-gray-800 mb-4">🔒 Restricted Access</h1>
+        <p className="text-gray-600 mb-6">
+        You must be logged in to access settings.
+        </p>
+        <a
+          href="/login"
+          className="inline-block bg-blue-600 text-white font-semibold px-6 py-3 rounded-full shadow hover:bg-blue-700 transition"
+        >
+          Go to Login
+        </a>
       </div>
     )
   }
-
+  
   return (
     <div className="max-w-2xl mx-auto p-6">
       <h1 className="text-3xl font-bold mb-6 text-center">Account Settings</h1>

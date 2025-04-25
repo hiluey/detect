@@ -11,39 +11,41 @@ export default function LoginPage() {
   const [error, setError] = useState('')
   const router = useRouter()
   const setUser = useStore((state) => state.setUser)
-
   const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError('')
-
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password })
-
-    if (error || !data.user) {
-      setError('Invalid email or password.')
-      return
+    e.preventDefault();
+    setError('');
+  
+    const res = await fetch('/api/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password }),
+      headers: { 'Content-Type': 'application/json' },
+    });
+  
+    if (!res.ok) {
+      setError('Invalid credentials.');
+      return;
     }
-
     const { data: userData, error: userError } = await supabase
       .from('users')
       .select('*')
-      .eq('auth_user_id', data.user.id)
-      .single()
-
+      .eq('email', email)
+      .single();
+  
     if (userError || !userData) {
-      setError('Failed to fetch user data.')
-      return
+      setError('Failed to fetch user data.');
+      return;
     }
-
+  
     setUser({
       id: userData.id,
-      email: data.user.email || '',
+      email,
       username: userData.username,
-      auth_user_id: data.user.id
-    })
-
-    router.push('/history')
-  }
-
+      auth_user_id: userData.auth_user_id
+    });
+  
+    router.push('/history');
+  };
+  
   return (
     <div className="flex justify-center items-center min-h-[80vh] px-4 py-12">
       <form

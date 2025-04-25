@@ -10,7 +10,7 @@ export async function loginUser(email: string, password: string) {
     throw new Error(authError?.message || 'Erro ao fazer login.');
   }
 
-  // Buscar dados na tabela 'users'
+
   const { data: userData, error: userError } = await supabase
     .from('users')
     .select('*')

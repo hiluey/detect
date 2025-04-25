@@ -11,7 +11,7 @@ export async function saveAnalysis({
   type: AnalysisType;
   input_text: string;
   result: string;
-  user?: State['user']; // <-- user é opcional agora
+  user?: State['user']; 
 }) {
   const { error } = await supabase.from('analyses').insert({
     user_id: user?.auth_user_id ?? null,

@@ -5,5 +5,5 @@ export type User = {
   auth_user_id: string;
   username: string;
   email: string;
-  birthdate?: string; // <- aqui você define o campo opcional
+  birthdate?: string; 
 };
