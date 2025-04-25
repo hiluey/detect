@@ -1,5 +1,6 @@
 'use client'
 
+
 import './globals.css'
 import Link from 'next/link'
 import { useStore } from '@/lib/useStore'
@@ -15,14 +16,6 @@ import {
   Settings,
   Cpu,
 } from 'lucide-react'
-
-export const metadata = {
-  title: {
-    default: 'AI Detect',
-    template: '%s | AI Detect',
-  },
-  description: 'Detecta textos gerados por IA e os humaniza com precisão.',
-}
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const [showMenu, setShowMenu] = useState(false)
