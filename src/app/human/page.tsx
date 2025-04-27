@@ -113,18 +113,19 @@ export default function HumanizerPage() {
 
         {/* Input textarea */}
         <div className="relative">
-          <textarea
-            value={inputText}
-            onChange={(e) => setInputText(e.target.value)}
-            rows={8}
-            maxLength={3000}
-            placeholder="Paste your text here..."
-            className="w-full rounded-2xl border border-gray-300 focus:ring-4 focus:ring-blue-300 focus:outline-none p-4 text-gray-700 text-base resize-none transition shadow-sm bg-gray-100 pr-20"
-          />
-          <div className="absolute bottom-3 right-4 text-xs text-gray-400">
-            {inputText.trim() ? inputText.trim().split(/\s+/).length : 0} words
-          </div>
+        <textarea
+          value={inputText}
+          onChange={(e) => setInputText(e.target.value)}
+          rows={8}
+          maxLength={3000}
+          placeholder="Paste or type your text here..."
+          className="w-full rounded-2xl border border-gray-300 focus:ring-4 focus:ring-blue-300 focus:outline-none p-4 text-gray-700 text-sm resize-none transition shadow-sm bg-gray-100 pr-24"
+        />
+        <div className="absolute bottom-2 right-4 text-xs text-gray-400">
+          {inputText.trim() ? inputText.trim().split(/\s+/).length : 0}/3000 words
         </div>
+      </div>
+
 
         {/* Humanize button */}
         <div className="mt-8 flex justify-center">
