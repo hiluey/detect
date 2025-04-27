@@ -3,6 +3,12 @@ import { NextResponse } from 'next/server'
 export async function POST(req: Request) {
   const { text } = await req.json()
 
+  const apiKey = process.env.UNDETECTABLE_API_KEY
+
+  if (!apiKey) {
+    return NextResponse.json({ error: 'API key not configured' }, { status: 500 })
+  }
+
   const res = await fetch("https://ai-detect.undetectable.ai/detect", {
     method: "POST",
     headers: {
@@ -11,7 +17,7 @@ export async function POST(req: Request) {
     },
     body: JSON.stringify({
       text,
-      key: "8895035d-0dd9-43ab-97a0-9aed70bb885d", 
+      key: apiKey,
       model: "xlm_ud_detector",
       retry_count: 0
     })

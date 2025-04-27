@@ -28,39 +28,31 @@ export default function HumanizerPage() {
     setOutputText('')
 
     try {
-      // Submit the text for humanization
-      const submitRes = await fetch('https://humanize.undetectable.ai/submit', {
+      // 1. Submit the text to internal API
+      const submitRes = await fetch('/api/humanize', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          apikey: '8895035d-0dd9-43ab-97a0-9aed70bb885d'
         },
-        body: JSON.stringify({
-          content: inputText,
-          readability: 'High School',
-          purpose: 'General Writing',
-          strength: 'More Human',
-          model: 'v11'
-        })
+        body: JSON.stringify({ inputText }),
       })
 
       const { id: documentId } = await submitRes.json()
       if (!documentId) throw new Error('Submission failed.')
 
-      // Polling the API for the result
+      // 2. Polling to check the result
       let tries = 0
       let resultData: any = null
 
       while (tries < 10) {
         await new Promise((r) => setTimeout(r, 3000))
 
-        const checkRes = await fetch('https://humanize.undetectable.ai/document', {
+        const checkRes = await fetch('/api/document', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            apikey: '8895035d-0dd9-43ab-97a0-9aed70bb885d'
           },
-          body: JSON.stringify({ id: documentId })
+          body: JSON.stringify({ id: documentId }),
         })
 
         resultData = await checkRes.json()
@@ -77,7 +69,7 @@ export default function HumanizerPage() {
           user,
           type: 'humanizer',
           input_text: inputText,
-          result: resultData.output
+          result: resultData.output,
         })
       } else {
         setOutputText('❌ Processing failed or no output returned.')
@@ -107,25 +99,28 @@ export default function HumanizerPage() {
           <h1 className="text-3xl sm:text-4xl font-bold text-gray-800 flex items-center justify-center gap-2">
             📝 Text Humanizer
           </h1>
-          <p className="text-gray-500 text-base mt-3">Make your text sound more natural and human-like.</p>
-          <p className="text-gray-400 text-sm mt-1">Minimum recommended length: 50 characters</p>
+          <p className="text-gray-500 text-base mt-3">
+            Make your text sound more natural and human-like.
+          </p>
+          <p className="text-gray-400 text-sm mt-1">
+            Minimum recommended length: 50 characters
+          </p>
         </div>
 
         {/* Input textarea */}
         <div className="relative">
-        <textarea
-          value={inputText}
-          onChange={(e) => setInputText(e.target.value)}
-          rows={8}
-          maxLength={3000}
-          placeholder="Paste or type your text here..."
-          className="w-full rounded-2xl border border-gray-300 focus:ring-4 focus:ring-blue-300 focus:outline-none p-4 text-gray-700 text-sm resize-none transition shadow-sm bg-gray-100 pr-24"
-        />
-        <div className="absolute bottom-2 right-4 text-xs text-gray-400">
-          {inputText.trim() ? inputText.trim().split(/\s+/).length : 0}/3000 words
+          <textarea
+            value={inputText}
+            onChange={(e) => setInputText(e.target.value)}
+            rows={8}
+            maxLength={3000}
+            placeholder="Paste or type your text here..."
+            className="w-full rounded-2xl border border-gray-300 focus:ring-4 focus:ring-blue-300 focus:outline-none p-4 text-gray-700 text-sm resize-none transition shadow-sm bg-gray-100 pr-24"
+          />
+          <div className="absolute bottom-2 right-4 text-xs text-gray-400">
+            {inputText.trim() ? inputText.trim().split(/\s+/).length : 0}/3000 words
+          </div>
         </div>
-      </div>
-
 
         {/* Humanize button */}
         <div className="mt-8 flex justify-center">
