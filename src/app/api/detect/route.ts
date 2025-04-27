@@ -1,4 +1,3 @@
-// app/api/detect/route.ts
 import { NextResponse } from 'next/server'
 
 export async function POST(req: Request) {
@@ -12,7 +11,7 @@ export async function POST(req: Request) {
     },
     body: JSON.stringify({
       text,
-      key: "8895035d-0dd9-43ab-97a0-9aed70bb885d", // sua chave de API
+      key: "8895035d-0dd9-43ab-97a0-9aed70bb885d", 
       model: "xlm_ud_detector",
       retry_count: 0
     })

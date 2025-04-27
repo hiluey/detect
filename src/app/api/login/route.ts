@@ -1,4 +1,3 @@
-// src/app/api/login/route.ts
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabaseClient';
 
@@ -19,7 +18,7 @@ export async function POST(req: Request) {
   res.cookies.set('sb-access-token', data.session.access_token, {
     httpOnly: true,
     path: '/',
-    maxAge: 60 * 60 * 24 * 7, // 7 dias
+    maxAge: 60 * 60 * 24 * 7, 
   });
 
   return res;

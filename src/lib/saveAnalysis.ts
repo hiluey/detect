@@ -1,5 +1,5 @@
 import { supabase } from './supabaseClient';
-import { AnalysisType } from './types'; // <-- corrigido
+import { AnalysisType } from './types'; 
 import { State } from './useStore';
 
 export async function saveAnalysis({
