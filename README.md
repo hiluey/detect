@@ -1,4 +1,11 @@
+link project : https://detect-ai-delta.vercel.app/detect
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+
+
+To log into the application: 
+Email: giohiluey557@gmail.com 
+Password: 123456
 
 ## Getting Started
 
